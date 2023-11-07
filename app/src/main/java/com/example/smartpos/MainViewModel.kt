@@ -24,7 +24,6 @@ import com.zoop.pos.plugin.smartpos.SmartPOSPlugin
 import com.zoop.pos.plugin.smartpos.requestBuilder.*
 
 class MainViewModel : ViewModel() {
-
     var state by mutableStateOf(MainState())
         private set
     private var voidTransaction: UserSelection<VoidTransaction>? = null

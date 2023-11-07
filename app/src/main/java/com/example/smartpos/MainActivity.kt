@@ -1,9 +1,22 @@
 package com.example.smartpos
 
+import android.content.Intent
+import android.net.Uri
+import android.net.http.SslError
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.webkit.CookieManager
+import android.webkit.SslErrorHandler
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,11 +40,103 @@ import androidx.compose.ui.unit.sp
 import com.example.smartpos.ui.theme.SmartPOSTheme
 import com.example.smartpos.util.SmartPOSPluginManager
 import com.example.smartpos.util.rememberQrBitmapPainter
+import java.net.URL
 
 class MainActivity : ComponentActivity() {
+
+    lateinit var webView: WebView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel = MainViewModel()
+        setContentView(R.layout.activity_main)
+        webView = findViewById(R.id.webView)
+        webView.settings.javaScriptEnabled = true
+        webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        webView.settings.allowFileAccess = true
+        webView.settings.allowFileAccessFromFileURLs = true
+        webView.settings.allowUniversalAccessFromFileURLs = true
+        webView.settings.builtInZoomControls = true
+        webView.settings.userAgentString = "tsAndroid"
+
+        webView.webViewClient = object: WebViewClient(){
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean{
+                if (!url.orEmpty().toLowerCase().contains(".easyanalytics.com.br") &&
+                    !url.orEmpty().toLowerCase().contains("easyanalytics.com.br") || url.orEmpty().toLowerCase().contains("hrefopenoutside88")
+                ){
+                    view?.context?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    return true
+                }else{
+                    if (url != null) {
+                        view?.loadUrl(url)
+                    }
+                    return false
+            }
+        }
+
+        override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler, error: SslError) {
+            handler.proceed() // Ignore SSL certificate errors
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            val cookieManager = CookieManager.getInstance()
+            val tsL = CookieManager.getInstance().getCookie(url)
+                if (tsL != null) {
+                    val temp = tsL.split(";")
+                    for (ar1 in temp) {
+                        if (ar1.contains("caTK")) {
+                            val temp1 = ar1.split("=")
+
+                            //tsStatic.AuthCookie = temp1[1]
+
+
+                        }
+                    }
+                }
+            cookieManager.setAcceptCookie(true)
+            cookieManager.flush()
+        }
+            @Suppress("deprecation")
+            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+                if ((errorCode in 400 until 600) || errorCode == -2) {
+                    //tsStatic.webView.stopLoading()
+                    //tsStatic.webView.loadUrl("file:///android_asset/conexao.html")
+                }
+                super.onReceivedError(view, errorCode, description, failingUrl)
+                //Toast.makeText(
+                    //tsStatic.SuperContexto,
+                   // "Your Internet Connection May not be active Or $description",
+                    //Toast.LENGTH_LONG
+               // ).show()
+            }
+
+            @androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.M)
+            override fun onReceivedError(
+                view: WebView?,
+                req: WebResourceRequest?,
+                rerr: WebResourceError?
+            ) {
+                val errorCode = rerr?.errorCode ?: 0
+                if ((errorCode in 400 until 600) || errorCode == -2) {
+                    //tsStatic.webView.stopLoading()
+                    //tsStatic.webView.loadUrl("file:///android_asset/conexao.html")
+                }
+                // super.onReceivedError(view, errorCode, req?.method, rerr?.description ?: "")
+                // Toast.makeText(
+                //tsStatic.SuperContexto,
+                // "Your Internet Connection May not be active Or ${rerr?.description}",
+                //  Toast.LENGTH_LONG
+                // ).show()
+            }
+        }
+
+        // Add a JavaScript interface
+        //webView.addJavascriptInterface(WebAppInterface(this, this), "Android")
+
+        // Load the URL
+        webView.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=zoop")
+
+
+/*        val viewModel = MainViewModel()
         setContent {
             SmartPOSTheme {
                 // A surface container using the 'background' color from the theme
@@ -42,9 +147,7 @@ class MainActivity : ComponentActivity() {
                     MainScreen(viewModel)
                 }
             }
-
-        }
-
+        }*/
     }
 }
 

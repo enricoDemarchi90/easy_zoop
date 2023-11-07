@@ -11,8 +11,8 @@ data class MainState(
     val startLogin: Boolean = false,
     val message: String = "",
     val qrCode: String = "",
-    val webView: WebView,
-    val context: SuperContext,
+    var webView: WebView? = null,
+    var SuperContexto: Context? = null,
     val transactionsList: List<VoidTransaction> = listOf()
 )
 
