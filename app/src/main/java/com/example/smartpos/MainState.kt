@@ -14,6 +14,7 @@ data class MainState(
     var webView: WebView? = null,
     var SuperContexto: Context? = null,
     val transactionsList: List<VoidTransaction> = listOf()
+    //comenta
 )
 
 enum class Status {

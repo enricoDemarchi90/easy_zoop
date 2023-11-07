@@ -52,7 +52,7 @@ class MainViewModel : ViewModel() {
         paymentRequest?.cancel() ?: pixRequest?.cancel() ?: voidTransaction?.cancel()
         ?: voidRequest?.cancel() ?: loginRequest?.cancel()
     }
-
+//coment
     private fun login() {
         paymentRequest = null
         voidRequest = null

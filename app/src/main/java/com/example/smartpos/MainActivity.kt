@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen(viewModel)
-                }
+                }a
             }
         }*/
     }
