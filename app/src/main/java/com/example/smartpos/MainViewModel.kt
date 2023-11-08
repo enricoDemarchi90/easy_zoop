@@ -1,6 +1,9 @@
 package com.example.smartpos
 
+import android.content.Intent
 import android.util.Log
+import android.webkit.JavascriptInterface
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,20 +11,26 @@ import androidx.lifecycle.ViewModel
 import com.zoop.pos.Zoop
 import com.zoop.pos.collection.UserSelection
 import com.zoop.pos.collection.VoidTransaction
+import com.zoop.pos.exception.ZoopRequestCanceledException
+import com.zoop.pos.plugin.DashboardConfirmationResponse
+import com.zoop.pos.plugin.DashboardThemeResponse
 import com.zoop.pos.plugin.DashboardTokenResponse
 import com.zoop.pos.plugin.ZoopFoundationPlugin
-import com.zoop.pos.type.Request
-import com.zoop.pos.type.Callback
-import com.zoop.pos.type.Option
-import com.zoop.pos.exception.ZoopRequestCanceledException
+import com.zoop.pos.plugin.smartpos.SmartPOSPlugin
+import com.zoop.pos.plugin.smartpos.requestBuilder.SmartPOSMenuOptions
+import com.zoop.pos.plugin.smartpos.requestBuilder.SmartPOSPaymentResponse
+import com.zoop.pos.plugin.smartpos.requestBuilder.SmartPOSPixPaymentResponse
+import com.zoop.pos.plugin.smartpos.requestBuilder.SmartPOSVoidResponse
+import com.zoop.pos.plugin.smartpos.requestBuilder.SmartPOSZoopKeyValidationResponse
 import com.zoop.pos.requestfield.MessageCallbackRequestField
 import com.zoop.pos.requestfield.PinCallbackRequestField
 import com.zoop.pos.requestfield.QRCodeCallbackRequestField
 import com.zoop.pos.terminal.Terminal
-import com.zoop.pos.plugin.DashboardConfirmationResponse
-import com.zoop.pos.plugin.DashboardThemeResponse
-import com.zoop.pos.plugin.smartpos.SmartPOSPlugin
-import com.zoop.pos.plugin.smartpos.requestBuilder.*
+import com.zoop.pos.type.Callback
+import com.zoop.pos.type.Option
+import com.zoop.pos.type.Request
+import kotlinx.coroutines.Runnable
+import org.json.JSONObject
 
 class MainViewModel : ViewModel() {
     var state by mutableStateOf(MainState())
@@ -52,7 +61,7 @@ class MainViewModel : ViewModel() {
         paymentRequest?.cancel() ?: pixRequest?.cancel() ?: voidTransaction?.cancel()
         ?: voidRequest?.cancel() ?: loginRequest?.cancel()
     }
-//coment
+
     private fun login() {
         paymentRequest = null
         voidRequest = null
@@ -89,6 +98,7 @@ class MainViewModel : ViewModel() {
                             status = Status.MESSAGE,
                             message = "Operação cancelada"
                         )
+
                         else -> state.copy(
                             status = Status.MESSAGE,
                             message = error.message.toString()
@@ -112,7 +122,6 @@ class MainViewModel : ViewModel() {
                         message = "SellerName: ${response.owner.name}"
                     )
                 }
-
             })
 
             .themeCallback(object : Callback<DashboardThemeResponse>() {
@@ -139,9 +148,7 @@ class MainViewModel : ViewModel() {
                 }
 
             }).build()
-
         Zoop.post(loginRequest!!)
-
     }
 
     private fun payment() {
@@ -195,18 +202,22 @@ class MainViewModel : ViewModel() {
                             "SmartPOS",
                             "Terminal.PinEventHandler.EventType.Start"
                         )
+
                         Terminal.PinEventHandler.EventType.Finish -> Log.d(
                             "SmartPOS",
                             "Terminal.PinEventHandler.EventType.Finish"
                         )
+
                         Terminal.PinEventHandler.EventType.Inserted -> Log.d(
                             "SmartPOS",
                             "Terminal.PinEventHandler.EventType.Inserted"
                         )
+
                         Terminal.PinEventHandler.EventType.Removed -> Log.d(
                             "SmartPOS",
                             "Terminal.PinEventHandler.EventType.Removed"
                         )
+
                         else -> Log.d("SmartPOS", "Terminal.PinEventHandler.EventType Else")
                     }
                 }
@@ -236,18 +247,15 @@ class MainViewModel : ViewModel() {
                 override fun onStart() {
                     state = state.copy(status = Status.MESSAGE, message = "Iniciando")
                 }
-
                 override fun onSuccess(response: SmartPOSPixPaymentResponse) {
                     state = state.copy(status = Status.MESSAGE, message = "SUCESSO")
                 }
-
                 override fun onFail(error: Throwable) {
                     val message = if (error.message?.contains("invalid session") == true) {
                         "Não foi realizado um login"
                     } else {
                         error.message
                     }
-
                     state = state.copy(status = Status.MESSAGE, message = message ?: "Falha")
                 }
 
@@ -272,7 +280,6 @@ class MainViewModel : ViewModel() {
 
         Zoop.post(pixRequest!!)
     }
-
 
     private fun checkZoopKey() {
         SmartPOSPlugin.createZoopKeyValidationRequestBuilder()
@@ -347,4 +354,328 @@ class MainViewModel : ViewModel() {
         Zoop.post(voidRequest!!)
 
     }
+
+    @JavascriptInterface
+    fun getReadCodBar(){
+        //val integrator = IntentIntegrator(mActivity)
+        //integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
+        //integrator.setPrompt("Scan")
+        //integrator.setCameraId(0)
+        //integrator.initiateScan()
+    }
+
+    @JavascriptInterface
+    fun zSair(){
+        val homeIntent = Intent(Intent.ACTION_MAIN)
+        homeIntent.addCategory(Intent.CATEGORY_HOME)
+        homeIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        tsStatic.SuperContexto!!.startActivity(homeIntent)
+    }
+
+    @JavascriptInterface
+    fun zPagamento(Conteudo: String) {
+        try {
+            val jObject: JSONObject = JSONObject(Conteudo)
+            val TipoOP: Int = jObject.getInt("TipoOP")
+            val Valor: Long = jObject.getLong("Valor")
+            val TipoAVista: Int = jObject.getInt("TipoAVista")
+            val Parcelas: Int = jObject.getInt("Parcelas")
+            val r = object : Runnable{
+                override fun run() {
+                    startPayment(TipoOP, Valor, TipoAVista, Parcelas)
+                }
+            }
+            r.run()
+        }catch (ex: Exception){
+            ExecutarJS("EasyPDVPOSPayError(-4, 0, '" + ex.toString().replace("'","")+"')")
+        }
+    }
+
+    fun startPayment(TipoOP: Int, Valor: Long, TipoAVista: Int, Parcelas: Int){
+        Log.d("teste startPayment", "==============")
+        try {
+            if (TipoOP == 1){//CC
+                if(TipoAVista == 1){//CC a vista
+                    loginRequest = null
+                    voidRequest = null
+
+                    Log.d("teste verificar se entrou ", "=================================================")
+
+                    paymentRequest = SmartPOSPlugin.createPaymentRequestBuilder()
+                        .amount(Valor)
+                        .option(Option.CREDIT)
+                        .installments(1)
+                        .callback(object : Callback<SmartPOSPaymentResponse>() {
+                            override fun onStart() {
+//                startLoadingAnimation()
+                                Log.d("SmartPOS", "onStart")
+                                state = state.copy(status = Status.MESSAGE, message = "Iniciando")
+                            }
+                            override fun onSuccess(response: SmartPOSPaymentResponse) {
+//                handleSucessfullPayment(response)
+                                Log.d("SmartPOS", "onSuccess")
+                                state = state.copy(status = Status.MESSAGE, message = "SUCESSO")
+                            }
+                            override fun onFail(error: Throwable) {
+//                handlePaymentFailure(exception)
+                                Log.d("SmartPOS", "onFail ${error.message}")
+                                val message = if (error.message?.contains("invalid session") == true) {
+                                    "Não foi realizado um login"
+                                } else {
+                                    error.message
+                                }
+                                state = state.copy(status = Status.MESSAGE, message = message ?: "Falha")
+                            }
+                        })
+                        .messageCallback(object : Callback<MessageCallbackRequestField.MessageData>() {
+                            override fun onSuccess(response: MessageCallbackRequestField.MessageData) {
+//                displayUserMessage(messageData.message)
+                                Log.d("SmartPOS", "messageCallback ${response.message}")
+                                state = state.copy(status = Status.MESSAGE, message = response.message)
+                            }
+                            override fun onFail(error: Throwable) {
+                                Log.d("SmartPOS", "messageCallback fail")
+                            }
+                        })
+                        .pinCallback(object : Callback<PinCallbackRequestField.PinData>() {
+                            override fun onSuccess(response: PinCallbackRequestField.PinData) {
+                                when (response.type) {
+                                    Terminal.PinEventHandler.EventType.Start -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Start"
+                                    )
+                                    Terminal.PinEventHandler.EventType.Finish -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Finish"
+                                    )
+                                    Terminal.PinEventHandler.EventType.Inserted -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Inserted"
+                                    )
+                                    Terminal.PinEventHandler.EventType.Removed -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Removed"
+                                    )
+                                    else -> Log.d("SmartPOS", "Terminal.PinEventHandler.EventType Else")
+                                }
+                            }
+                            override fun onFail(error: Throwable) {
+                                Log.d("SmartPOS", "onFail ${error.message}")
+                            }
+                        })
+                        .menuSelectionCallback(object : Callback<SmartPOSMenuOptions>() {
+                            override fun onFail(error: Throwable) {
+                            }
+                            override fun onSuccess(response: SmartPOSMenuOptions) {
+                                // Apresentar lista ao usuário conforme a documentação
+                            }
+                        })
+                        .build()
+                    Zoop.post(paymentRequest!!)
+                }
+                if(TipoAVista == 2){//CC parcelado
+                    loginRequest = null
+                    voidRequest = null
+                    paymentRequest = SmartPOSPlugin.createPaymentRequestBuilder()
+                        .amount(Valor)
+                        .option(Option.CREDIT_WITH_INSTALLMENTS)
+                        .installments(Parcelas)
+                        .callback(object : Callback<SmartPOSPaymentResponse>() {
+                            override fun onStart() {
+//                startLoadingAnimation()
+                                Log.d("SmartPOS", "onStart")
+                                state = state.copy(status = Status.MESSAGE, message = "Iniciando")
+                            }
+                            override fun onSuccess(response: SmartPOSPaymentResponse) {
+//                handleSucessfullPayment(response)
+                                Log.d("SmartPOS", "onSuccess")
+                                state = state.copy(status = Status.MESSAGE, message = "SUCESSO")
+                            }
+                            override fun onFail(error: Throwable) {
+//                handlePaymentFailure(exception)
+                                Log.d("SmartPOS", "onFail ${error.message}")
+                                val message = if (error.message?.contains("invalid session") == true) {
+                                    "Não foi realizado um login"
+                                } else {
+                                    error.message
+                                }
+                                state = state.copy(status = Status.MESSAGE, message = message ?: "Falha")
+                            }
+                        })
+                        .messageCallback(object : Callback<MessageCallbackRequestField.MessageData>() {
+                            override fun onSuccess(response: MessageCallbackRequestField.MessageData) {
+//                displayUserMessage(messageData.message)
+                                Log.d("SmartPOS", "messageCallback ${response.message}")
+                                state = state.copy(status = Status.MESSAGE, message = response.message)
+                            }
+                            override fun onFail(error: Throwable) {
+                                Log.d("SmartPOS", "messageCallback fail")
+                            }
+                        })
+                        .pinCallback(object : Callback<PinCallbackRequestField.PinData>() {
+                            override fun onSuccess(response: PinCallbackRequestField.PinData) {
+                                when (response.type) {
+                                    Terminal.PinEventHandler.EventType.Start -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Start"
+                                    )
+                                    Terminal.PinEventHandler.EventType.Finish -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Finish"
+                                    )
+                                    Terminal.PinEventHandler.EventType.Inserted -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Inserted"
+                                    )
+                                    Terminal.PinEventHandler.EventType.Removed -> Log.d(
+                                        "SmartPOS",
+                                        "Terminal.PinEventHandler.EventType.Removed"
+                                    )
+                                    else -> Log.d("SmartPOS", "Terminal.PinEventHandler.EventType Else")
+                                }
+                            }
+                            override fun onFail(error: Throwable) {
+                                Log.d("SmartPOS", "onFail ${error.message}")
+                            }
+                        })
+                        .menuSelectionCallback(object : Callback<SmartPOSMenuOptions>() {
+                            override fun onFail(error: Throwable) {
+                            }
+                            override fun onSuccess(response: SmartPOSMenuOptions) {
+                                // Apresentar lista ao usuário conforme a documentação
+                            }
+                        })
+                        .build()
+                    Zoop.post(paymentRequest!!)
+                }
+            }
+            if (TipoOP == 2){//CD
+                loginRequest = null
+                voidRequest = null
+                paymentRequest = SmartPOSPlugin.createPaymentRequestBuilder()
+                    .amount(Valor)
+                    .option(Option.DEBIT)
+                    .installments(1)
+                    .callback(object : Callback<SmartPOSPaymentResponse>() {
+                        override fun onStart() {
+//                startLoadingAnimation()
+                            Log.d("SmartPOS", "onStart")
+                            state = state.copy(status = Status.MESSAGE, message = "Iniciando")
+                        }
+                        override fun onSuccess(response: SmartPOSPaymentResponse) {
+//                handleSucessfullPayment(response)
+                            Log.d("SmartPOS", "onSuccess")
+                            state = state.copy(status = Status.MESSAGE, message = "SUCESSO")
+                        }
+                        override fun onFail(error: Throwable) {
+//                handlePaymentFailure(exception)
+                            Log.d("SmartPOS", "onFail ${error.message}")
+                            val message = if (error.message?.contains("invalid session") == true) {
+                                "Não foi realizado um login"
+                            } else {
+                                error.message
+                            }
+                            state = state.copy(status = Status.MESSAGE, message = message ?: "Falha")
+                        }
+                    })
+                    .messageCallback(object : Callback<MessageCallbackRequestField.MessageData>() {
+                        override fun onSuccess(response: MessageCallbackRequestField.MessageData) {
+//                displayUserMessage(messageData.message)
+                            Log.d("SmartPOS", "messageCallback ${response.message}")
+                            state = state.copy(status = Status.MESSAGE, message = response.message)
+                        }
+                        override fun onFail(error: Throwable) {
+                            Log.d("SmartPOS", "messageCallback fail")
+                        }
+                    })
+                    .pinCallback(object : Callback<PinCallbackRequestField.PinData>() {
+                        override fun onSuccess(response: PinCallbackRequestField.PinData) {
+                            when (response.type) {
+                                Terminal.PinEventHandler.EventType.Start -> Log.d(
+                                    "SmartPOS",
+                                    "Terminal.PinEventHandler.EventType.Start"
+                                )
+                                Terminal.PinEventHandler.EventType.Finish -> Log.d(
+                                    "SmartPOS",
+                                    "Terminal.PinEventHandler.EventType.Finish"
+                                )
+                                Terminal.PinEventHandler.EventType.Inserted -> Log.d(
+                                    "SmartPOS",
+                                    "Terminal.PinEventHandler.EventType.Inserted"
+                                )
+                                Terminal.PinEventHandler.EventType.Removed -> Log.d(
+                                    "SmartPOS",
+                                    "Terminal.PinEventHandler.EventType.Removed"
+                                )
+                                else -> Log.d("SmartPOS", "Terminal.PinEventHandler.EventType Else")
+                            }
+                        }
+                        override fun onFail(error: Throwable) {
+                            Log.d("SmartPOS", "onFail ${error.message}")
+                        }
+                    })
+                    .menuSelectionCallback(object : Callback<SmartPOSMenuOptions>() {
+                        override fun onFail(error: Throwable) {
+                        }
+                        override fun onSuccess(response: SmartPOSMenuOptions) {
+                            // Apresentar lista ao usuário conforme a documentação
+                        }
+                    })
+                    .build()
+                Zoop.post(paymentRequest!!)
+            }
+            if (TipoOP == 3){//PIX
+                pixRequest = SmartPOSPlugin.createPixPaymentRequestBuilder()
+                    .amount(Valor)
+                    .callback(object : Callback<SmartPOSPixPaymentResponse>() {
+                        override fun onStart() {
+                            state = state.copy(status = Status.MESSAGE, message = "Iniciando")
+                        }
+                        override fun onSuccess(response: SmartPOSPixPaymentResponse) {
+                            state = state.copy(status = Status.MESSAGE, message = "SUCESSO")
+                        }
+                        override fun onFail(error: Throwable) {
+                            val message = if (error.message?.contains("invalid session") == true) {
+                                "Não foi realizado um login"
+                            } else {
+                                error.message
+                            }
+                            state = state.copy(status = Status.MESSAGE, message = message ?: "Falha")
+                        }
+
+                    })
+                    .messageCallback(object : Callback<MessageCallbackRequestField.MessageData>() {
+                        override fun onSuccess(response: MessageCallbackRequestField.MessageData) {
+                            state = state.copy(status = Status.MESSAGE, message = response.message)
+                        }
+                        override fun onFail(error: Throwable) {
+                        }
+                    })
+                    .qrCodeCallback(object : Callback<QRCodeCallbackRequestField.QRCodeData>() {
+                        override fun onSuccess(response: QRCodeCallbackRequestField.QRCodeData) {
+                            state = state.copy(status = Status.QR_CODE, qrCode = response.data)
+                        }
+                        override fun onFail(error: Throwable) {
+                        }
+                    })
+                    .build()
+                Zoop.post(pixRequest!!)
+            }
+        }catch (ex: Exception){
+            ExecutarJS("EasyPDVPosPayError(-3, 0, '" + ex.toString().replace("'","")+"');")
+        }
+    }
+
+    fun ExecutarJS(JS: String) {
+        tsStatic.webView?.post(Runnable {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                tsStatic.webView!!.evaluateJavascript("(function() { $JS })();") { value ->
+                    value
+                }
+            } else{
+                tsStatic.webView!!.loadUrl("javascript:android.onData($JS)")
+            }
+        })
+    }
+
 }

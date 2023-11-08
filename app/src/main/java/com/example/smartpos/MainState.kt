@@ -11,11 +11,13 @@ data class MainState(
     val startLogin: Boolean = false,
     val message: String = "",
     val qrCode: String = "",
-    var webView: WebView? = null,
-    var SuperContexto: Context? = null,
     val transactionsList: List<VoidTransaction> = listOf()
-    //comenta
 )
+
+object tsStatic{
+    var webView: WebView? = null
+    var SuperContexto: Context? = null
+}
 
 enum class Status {
     STARTED,

@@ -1,9 +1,9 @@
 package com.example.smartpos
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.CookieManager
@@ -16,7 +16,6 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,52 +30,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smartpos.ui.theme.SmartPOSTheme
 import com.example.smartpos.util.SmartPOSPluginManager
 import com.example.smartpos.util.rememberQrBitmapPainter
-import java.net.URL
 
 class MainActivity : ComponentActivity() {
-
-    lateinit var webView: WebView
-
+    lateinit var SuperContext: Context
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        webView = findViewById(R.id.webView)
-        webView.settings.javaScriptEnabled = true
-        webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
-        webView.settings.allowFileAccess = true
-        webView.settings.allowFileAccessFromFileURLs = true
-        webView.settings.allowUniversalAccessFromFileURLs = true
-        webView.settings.builtInZoomControls = true
-        webView.settings.userAgentString = "tsAndroid"
-
-        webView.webViewClient = object: WebViewClient(){
+        SuperContext = this
+        tsStatic.webView = findViewById(R.id.webView)
+        tsStatic.webView!!.settings.javaScriptEnabled = true
+        tsStatic.webView!!.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        tsStatic.webView!!.settings.allowFileAccess = true
+        tsStatic.webView!!.settings.allowFileAccessFromFileURLs = true
+        tsStatic.webView!!.settings.allowUniversalAccessFromFileURLs = true
+        tsStatic.webView!!.settings.builtInZoomControls = true
+        tsStatic.webView!!.settings.userAgentString = "tsAndroid"
+        tsStatic.webView!!.webViewClient = object: WebViewClient(){
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean{
                 if (!url.orEmpty().toLowerCase().contains(".easyanalytics.com.br") &&
                     !url.orEmpty().toLowerCase().contains("easyanalytics.com.br") || url.orEmpty().toLowerCase().contains("hrefopenoutside88")
                 ){
                     view?.context?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     return true
-                }else{
+                } else{
                     if (url != null) {
                         view?.loadUrl(url)
                     }
                     return false
             }
         }
-
         override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler, error: SslError) {
             handler.proceed() // Ignore SSL certificate errors
         }
-
         override fun onPageFinished(view: WebView?, url: String?) {
             val cookieManager = CookieManager.getInstance()
             val tsL = CookieManager.getInstance().getCookie(url)
@@ -85,10 +77,7 @@ class MainActivity : ComponentActivity() {
                     for (ar1 in temp) {
                         if (ar1.contains("caTK")) {
                             val temp1 = ar1.split("=")
-
                             //tsStatic.AuthCookie = temp1[1]
-
-
                         }
                     }
                 }
@@ -102,11 +91,11 @@ class MainActivity : ComponentActivity() {
                     //tsStatic.webView.loadUrl("file:///android_asset/conexao.html")
                 }
                 super.onReceivedError(view, errorCode, description, failingUrl)
-                //Toast.makeText(
-                    //tsStatic.SuperContexto,
-                   // "Your Internet Connection May not be active Or $description",
-                    //Toast.LENGTH_LONG
-               // ).show()
+                Toast.makeText(
+                    SuperContext,
+                    "Your Internet Connection May not be active Or $description",
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             @androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.M)
@@ -121,22 +110,30 @@ class MainActivity : ComponentActivity() {
                     //tsStatic.webView.loadUrl("file:///android_asset/conexao.html")
                 }
                 // super.onReceivedError(view, errorCode, req?.method, rerr?.description ?: "")
-                // Toast.makeText(
-                //tsStatic.SuperContexto,
-                // "Your Internet Connection May not be active Or ${rerr?.description}",
-                //  Toast.LENGTH_LONG
-                // ).show()
+                Toast.makeText(
+                SuperContext,
+                 "Your Internet Connection May not be active Or ${rerr?.description}",
+                  Toast.LENGTH_LONG
+                 ).show()
             }
         }
-
         // Add a JavaScript interface
+        tsStatic.webView!!.addJavascriptInterface(MainViewModel(),"Android")
         //webView.addJavascriptInterface(WebAppInterface(this, this), "Android")
 
         // Load the URL
-        webView.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=zoop")
+        tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=rede")
 
+        val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putString("marketplace","0bc5d980777d43fd9aee0f8d215d8735")
+        editor.putString("seller","afc4a20ebe09433fac674ad0856ac33c")
+        editor.putString("accessKey","57c813b3-2330-4ed9-9ad7-14534ff595cd")
+        editor.commit()
 
-/*        val viewModel = MainViewModel()
+        SmartPOSPluginManager().initialize(SuperContext)
+
+    /*  val viewModel = MainViewModel()
         setContent {
             SmartPOSTheme {
                 // A surface container using the 'background' color from the theme
@@ -145,11 +142,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen(viewModel)
-                }a
+                }
             }
         }*/
     }
-}
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
@@ -331,4 +327,6 @@ fun AssembleVoidTransactionList(state: MainState, handler: (MainEvent) -> Unit) 
             Divider(color = Color.Gray)
         }
     }
+}
+
 }
