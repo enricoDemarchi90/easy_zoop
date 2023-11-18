@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
-import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -118,11 +117,11 @@ class MainActivity : ComponentActivity() {
             }
         }
         // Add a JavaScript interface
-        tsStatic.webView!!.addJavascriptInterface(MainViewModel(),"Android")
-        //webView.addJavascriptInterface(WebAppInterface(this, this), "Android")
+        //tsStatic.webView!!.addJavascriptInterface(MainViewModel(),"Android")
+        tsStatic.webView!!.addJavascriptInterface(WebAppInterface(SuperContext), "Android")
 
         // Load the URL
-        tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=rede")
+        tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=paytime")
 
         val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
         val editor = preferences.edit()
@@ -133,7 +132,8 @@ class MainActivity : ComponentActivity() {
 
         SmartPOSPluginManager().initialize(SuperContext)
 
-    /*  val viewModel = MainViewModel()
+
+  /*    val viewModel = MainViewModel()
         setContent {
             SmartPOSTheme {
                 // A surface container using the 'background' color from the theme

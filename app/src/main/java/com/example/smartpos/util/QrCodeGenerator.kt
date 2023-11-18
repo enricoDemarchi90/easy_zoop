@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,7 +21,7 @@ fun rememberQrBitmapPainter(
     content: String,
     size: Dp = 150.dp,
     padding: Dp = 0.dp
-): BitmapPainter {
+): Painter {
 
     val density = LocalDensity.current
     val sizePx = with(density) { size.roundToPx() }

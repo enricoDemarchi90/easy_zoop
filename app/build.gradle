@@ -54,10 +54,10 @@ android {
 dependencies {
     //EnricoLucas
     implementation("br.zoop.pos.plugin:smartpos:1.6.4-rc-1")
+    //implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("com.google.zxing:core:3.5.1")
-
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
     implementation("com.squareup.okhttp:okhttp:2.5.0")
