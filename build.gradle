@@ -43,7 +43,6 @@ allprojects {
                 password = password
             }
         }
-
         flatDir {
             dirs("libs")
         }

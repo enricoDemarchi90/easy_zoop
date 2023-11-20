@@ -36,7 +36,6 @@ import com.zoop.pos.type.Request
 import kotlinx.coroutines.Runnable
 import org.json.JSONObject
 
-
 class MainViewModel() : ViewModel() {
     var state by mutableStateOf(MainState())
         private set

@@ -116,11 +116,8 @@ class MainActivity : ComponentActivity() {
                  ).show()
             }
         }
-        // Add a JavaScript interface
         //tsStatic.webView!!.addJavascriptInterface(MainViewModel(),"Android")
         tsStatic.webView!!.addJavascriptInterface(WebAppInterface(SuperContext), "Android")
-
-        // Load the URL
         tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=paytime")
 
         val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
@@ -128,23 +125,26 @@ class MainActivity : ComponentActivity() {
         editor.putString("marketplace","0bc5d980777d43fd9aee0f8d215d8735")
         editor.putString("seller","afc4a20ebe09433fac674ad0856ac33c")
         editor.putString("accessKey","57c813b3-2330-4ed9-9ad7-14534ff595cd")
+        //editor.putString("marketplace","")
+        //editor.putString("seller","")
+        //editor.putString("accessKey","")
         editor.commit()
 
         SmartPOSPluginManager().initialize(SuperContext)
 
 
-  /*    val viewModel = MainViewModel()
-        setContent {
-            SmartPOSTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainScreen(viewModel)
-                }
-            }
-        }*/
+//     val viewModel = MainViewModel()
+//        setContent {
+//            SmartPOSTheme {
+//                // A surface container using the 'background' color from the theme
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+//                    MainScreen(viewModel)
+//                }
+//            }
+//        }
     }
 
 @Composable

@@ -109,7 +109,6 @@ class PrinterTester() {
 
     fun printBitmap(bitmap: Bitmap) {
         try {
-            //var bitmapImage: Bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.size)
             printer!!.printBitmap(bitmap)
             Log.d("PrinterTester","printBitmap")
         } catch (e: PrinterDevException) {
@@ -117,7 +116,6 @@ class PrinterTester() {
             Log.e("printBitmap", e.toString())
         }
     }
-
 
     fun start(): String? {
         return try {
