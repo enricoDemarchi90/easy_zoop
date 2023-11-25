@@ -1,10 +1,12 @@
 package com.example.smartpos
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
+import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -36,9 +38,18 @@ import androidx.compose.ui.unit.sp
 import com.example.smartpos.ui.theme.SmartPOSTheme
 import com.example.smartpos.util.SmartPOSPluginManager
 import com.example.smartpos.util.rememberQrBitmapPainter
+import com.zoop.pos.Zoop
+import com.zoop.pos.plugin.DashboardConfirmationResponse
+import com.zoop.pos.plugin.DashboardTokenResponse
+import com.zoop.pos.plugin.ZoopFoundationPlugin
+import com.zoop.pos.plugin.smartpos.SmartPOSPlugin
+import com.zoop.pos.type.Callback
+import com.zoop.pos.type.Environment
+import com.zoop.pos.type.LogLevel
 
 class MainActivity : ComponentActivity() {
     lateinit var SuperContext: Context
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -117,8 +128,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         //tsStatic.webView!!.addJavascriptInterface(MainViewModel(),"Android")
-        tsStatic.webView!!.addJavascriptInterface(WebAppInterface(SuperContext), "Android")
-        tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=paytime")
+
 
         val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
         val editor = preferences.edit()
@@ -129,25 +139,26 @@ class MainActivity : ComponentActivity() {
         //editor.putString("seller","")
         //editor.putString("accessKey","")
         editor.commit()
-
         SmartPOSPluginManager().initialize(SuperContext)
+        tsStatic.webView!!.addJavascriptInterface(WebAppInterface(SuperContext), "Android")
+        tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=paytime")
 
 
-//     val viewModel = MainViewModel()
-//        setContent {
-//            SmartPOSTheme {
-//                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    MainScreen(viewModel)
-//                }
-//            }
-//        }
+/*     val viewModel = MainViewModel()
+        setContent {
+            SmartPOSTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainScreen(viewModel)
+                }
+            }
+        }*/
     }
 
-@Composable
+    @Composable
 fun MainScreen(viewModel: MainViewModel) {
     SmartPOSPluginManager().initialize(LocalContext.current)
 

@@ -1,7 +1,6 @@
 package com.example.smartpos.util
 
 import android.content.Context
-import android.util.Log
 import androidx.activity.ComponentActivity
 import com.zoop.pos.Zoop
 import com.zoop.pos.plugin.DashboardConfirmationResponse
@@ -13,18 +12,29 @@ class SmartPOSPluginManager(private val credentials: DashboardConfirmationRespon
     var spMarketplace: String? = ""
     var spSeller: String? = ""
     var spAcessKey: String? = ""
+
     fun initialize(context: Context) {
-        Zoop.initialize(context) {
-            val preferences = context.getSharedPreferences("user_preferences", ComponentActivity.MODE_PRIVATE)
-            spMarketplace = preferences.getString("marketplace","")
-            spSeller = preferences.getString("seller","")
-            spAcessKey = preferences.getString("accessKey","")
-            credentials{
-                marketplace = spMarketplace.toString()
-                seller = spSeller.toString()
-                accessKey = spAcessKey.toString()
+            Zoop.initialize(context) {
+                val preferences = context.getSharedPreferences("user_preferences", ComponentActivity.MODE_PRIVATE)
+                if (preferences.getString("marketplace","") != "" && preferences.getString("seller","") != "" && preferences.getString("accessKey","") != ""){
+                    spMarketplace = preferences.getString("marketplace","")
+                    spSeller = preferences.getString("seller","")
+                    spAcessKey = preferences.getString("accessKey","")
+                    credentials{
+                        marketplace = spMarketplace.toString()
+                        seller = spSeller.toString()
+                        accessKey = spAcessKey.toString()
+                    }
+                } else {
+                    if (credentials != null) {
+                        credentials {
+                            marketplace = credentials.marketplace
+                            seller = credentials.seller
+                            accessKey = credentials.accessKey
+                        }
+                    }
+                }
             }
-        }
         Zoop.setEnvironment(Environment.Production)
         Zoop.setLogLevel(LogLevel.Trace)
         Zoop.setStrict(false)
