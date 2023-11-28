@@ -1,4 +1,4 @@
-package com.example.smartpos.ui.theme
+package com.example.EasyMobilePDV.ui.theme
 
 import android.app.Activity
 import android.os.Build

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.smartpos'
+    namespace 'com.example.EasyMobilePDV'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.smartpos"
+        applicationId "com.example.EasyMobilePDV"
         minSdk 23
         targetSdk 33
         versionCode 1

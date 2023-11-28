@@ -1,4 +1,4 @@
-package com.example.smartpos
+package com.example.EasyMobilePDV
 
 import org.junit.Test
 

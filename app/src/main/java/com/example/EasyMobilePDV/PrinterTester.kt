@@ -1,4 +1,4 @@
-package com.example.smartpos
+package com.example.EasyMobilePDV
 
 import android.content.Context
 import android.graphics.Bitmap

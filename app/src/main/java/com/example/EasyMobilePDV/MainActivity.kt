@@ -1,12 +1,10 @@
-package com.example.smartpos
+package com.example.EasyMobilePDV
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
-import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -16,7 +14,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -35,17 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.smartpos.ui.theme.SmartPOSTheme
-import com.example.smartpos.util.SmartPOSPluginManager
-import com.example.smartpos.util.rememberQrBitmapPainter
-import com.zoop.pos.Zoop
-import com.zoop.pos.plugin.DashboardConfirmationResponse
-import com.zoop.pos.plugin.DashboardTokenResponse
-import com.zoop.pos.plugin.ZoopFoundationPlugin
-import com.zoop.pos.plugin.smartpos.SmartPOSPlugin
-import com.zoop.pos.type.Callback
-import com.zoop.pos.type.Environment
-import com.zoop.pos.type.LogLevel
+import com.example.EasyMobilePDV.util.SmartPOSPluginManager
+import com.example.EasyMobilePDV.util.rememberQrBitmapPainter
 
 class MainActivity : ComponentActivity() {
     lateinit var SuperContext: Context
@@ -127,24 +115,23 @@ class MainActivity : ComponentActivity() {
                  ).show()
             }
         }
-        //tsStatic.webView!!.addJavascriptInterface(MainViewModel(),"Android")
 
-
+        /*
         val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
         val editor = preferences.edit()
-        editor.putString("marketplace","0bc5d980777d43fd9aee0f8d215d8735")
-        editor.putString("seller","afc4a20ebe09433fac674ad0856ac33c")
-        editor.putString("accessKey","57c813b3-2330-4ed9-9ad7-14534ff595cd")
-        //editor.putString("marketplace","")
-        //editor.putString("seller","")
-        //editor.putString("accessKey","")
-        editor.commit()
+        //editor.putString("marketplace","0bc5d980777d43fd9aee0f8d215d8735")
+        //editor.putString("seller","afc4a20ebe09433fac674ad0856ac33c")
+        //editor.putString("accessKey","57c813b3-2330-4ed9-9ad7-14534ff595cd")
+        editor.putString("marketplace","")
+        editor.putString("seller","")
+        editor.putString("accessKey","")
+        editor.commit()*/
+
         SmartPOSPluginManager().initialize(SuperContext)
         tsStatic.webView!!.addJavascriptInterface(WebAppInterface(SuperContext), "Android")
         tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=paytime")
 
-
-/*     val viewModel = MainViewModel()
+        /*     val viewModel = MainViewModel()
         setContent {
             SmartPOSTheme {
                 // A surface container using the 'background' color from the theme
@@ -159,7 +146,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-fun MainScreen(viewModel: MainViewModel) {
+    fun MainScreen(viewModel: MainViewModel) {
     SmartPOSPluginManager().initialize(LocalContext.current)
 
     Column(
@@ -281,63 +268,63 @@ fun MainScreen(viewModel: MainViewModel) {
     }
 }
 
-@Composable
-fun CancelButton(handler: (MainEvent) -> Unit) {
-    OutlinedButton(
-        onClick = { handler(MainEvent.OnCancelAction) },
-        modifier = Modifier
-            .padding(5.dp)
-            .background(color = Color.Transparent)
-    ) {
-        Text(
-            text = "Cancelar operação",
-            modifier = Modifier.padding(8.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-    }
-}
-
-@Composable
-fun AssembleVoidTransactionList(state: MainState, handler: (MainEvent) -> Unit) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.80f)
-            .padding(top = 15.dp, bottom = 15.dp),
-        verticalArrangement = Arrangement.Top
-    ) {
-        itemsIndexed(items = state.transactionsList) { _, item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .clickable { handler(MainEvent.OnSelectTransaction(item)) },
-            ) {
-                Text(
-                    text = "R$ " + item.amount,
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .align(Alignment.CenterVertically),
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Start
-                )
-
-                Text(
-                    text = "${item.date} ${item.time}",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1.5f)
-                        .padding(end = 10.dp),
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.End
-                )
-            }
-
-            Divider(color = Color.Gray)
+    @Composable
+    fun CancelButton(handler: (MainEvent) -> Unit) {
+        OutlinedButton(
+            onClick = { handler(MainEvent.OnCancelAction) },
+            modifier = Modifier
+                .padding(5.dp)
+                .background(color = Color.Transparent)
+        ) {
+            Text(
+                text = "Cancelar operação",
+                modifier = Modifier.padding(8.dp),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
         }
     }
-}
+
+    @Composable
+    fun AssembleVoidTransactionList(state: MainState, handler: (MainEvent) -> Unit) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.80f)
+                .padding(top = 15.dp, bottom = 15.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            itemsIndexed(items = state.transactionsList) { _, item ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .clickable { handler(MainEvent.OnSelectTransaction(item)) },
+                ) {
+                    Text(
+                        text = "R$ " + item.amount,
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .align(Alignment.CenterVertically),
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start
+                    )
+
+                    Text(
+                        text = "${item.date} ${item.time}",
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .weight(1.5f)
+                            .padding(end = 10.dp),
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.End
+                    )
+                }
+
+                Divider(color = Color.Gray)
+            }
+        }
+    }
 
 }

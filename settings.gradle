@@ -8,4 +8,4 @@
 //}
 
 rootProject.name = "SmartPOS"
-include ':app'
+include ':app', ':EasyMobilePDV'
