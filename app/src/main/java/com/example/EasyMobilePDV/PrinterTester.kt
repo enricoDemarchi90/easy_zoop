@@ -11,7 +11,6 @@ import com.pax.dal.entity.EFontTypeExtCode
 import com.pax.dal.exceptions.PrinterDevException
 import com.pax.neptunelite.api.NeptuneLiteUser
 
-
 class PrinterTester() {
 
     private var printerTester: PrinterTester? = null

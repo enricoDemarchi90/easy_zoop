@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.SmartPOS" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--<style name="Theme.TesteWebView" parent="Theme.SmartPOS" />
+    <style name="FullScreen" parent="Theme.TesteWebView">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">#4cd038</item>
+    </style>-->
+
+    <style name="FullScreen" parent="Theme.SmartPOS">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">#4cd038</item>
+    </style>
+
 </resources>

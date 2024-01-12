@@ -2,6 +2,7 @@ package com.example.EasyMobilePDV.util
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import com.zoop.pos.InitializeData
 import com.zoop.pos.Zoop
 import com.zoop.pos.plugin.DashboardConfirmationResponse
 import com.zoop.pos.type.Environment
@@ -14,12 +15,12 @@ class SmartPOSPluginManager(private val credentials: DashboardConfirmationRespon
     var spAcessKey: String? = ""
 
     fun initialize(context: Context) {
-            Zoop.initialize(context) {
+        Zoop.initialize(context) {
                 val preferences = context.getSharedPreferences("user_preferences", ComponentActivity.MODE_PRIVATE)
-                if (preferences.getString("marketplace","") != "" && preferences.getString("seller","") != "" && preferences.getString("accessKey","") != ""){
-                    spMarketplace = preferences.getString("marketplace","")
-                    spSeller = preferences.getString("seller","")
-                    spAcessKey = preferences.getString("accessKey","")
+                if (preferences.getString("MarketplaceId","") != "" && preferences.getString("SellerId","") != "" && preferences.getString("AccessKey","") != ""){
+                    spMarketplace = preferences.getString("MarketplaceId","")
+                    spSeller = preferences.getString("SellerId","")
+                    spAcessKey = preferences.getString("AccessKey","")
                     credentials{
                         marketplace = spMarketplace.toString()
                         seller = spSeller.toString()
