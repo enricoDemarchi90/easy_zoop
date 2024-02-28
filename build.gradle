@@ -30,7 +30,6 @@ allprojects {
         def localProperties = new Properties()
         localProperties.load(new FileInputStream(rootProject.file('local.properties')))
 
-        // Access the credentials
         def username = localProperties.getProperty("my_user")
         def password = localProperties.getProperty("my_pass")
 

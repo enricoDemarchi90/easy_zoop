@@ -27,14 +27,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <!--ImageView
             android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="32dp"
             android:adjustViewBounds="true"
             android:clipToPadding="true"
-            android:src="@drawable/logo_negativa" />
+            android:src="@drawable/logo_negativa" -->
 
         <FrameLayout
             android:layout_width="match_parent"

@@ -186,7 +186,6 @@ class PaymentActivity : ComponentActivity() {
         }
     }
 
-
 }
 
 enum class PaymentStatus {
