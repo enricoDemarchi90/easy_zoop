@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
+import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -17,7 +18,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import com.example.EasyMobilePDV.util.SmartPOSPluginManager
-
+import com.google.zxing.integration.android.IntentIntegrator
 
 class MainActivity : ComponentActivity() {
     lateinit var SuperContext: Context
@@ -100,17 +101,17 @@ class MainActivity : ComponentActivity() {
                  ).show()
             }
         }
-        val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
+        /*val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
         val editor = preferences.edit()
         editor.putString("MarketplaceId","0bc5d980777d43fd9aee0f8d215d8735")
         editor.putString("SellerId","43f859c8ac5949b5ba5e25c934f5019a")
         editor.putString("Terminal","1493572076")
         editor.putString("AccessKey","cfb1ccad-80fd-45e9-9b31-716be7913df7")
-      /*  editor.putString("MarketplaceId","")
+        editor.putString("MarketplaceId","")
         editor.putString("SellerId","")
         editor.putString("Terminal","")
-        editor.putString("AccessKey","")*/
-        editor.commit()
+        editor.putString("AccessKey","")
+        editor.commit()*/
         SmartPOSPluginManager().initialize(SuperContext)
         tsStatic.webView!!.addJavascriptInterface(WebAppInterface(SuperContext,this), "Android")
         tsStatic.webView!!.loadUrl("https://easyanalytics.com.br/easymobile/V0/login/?Fonte=paytime")
@@ -134,7 +135,22 @@ class MainActivity : ComponentActivity() {
         paymentManager.closeActivity()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            if (result.contents == null) {
+                //Toast.makeText(SuperContext, "cancelled", Toast.LENGTH_SHORT).show()
+                Log.d("TESTE","cancelado ")
 
+            } else {
+                //Toast.makeText(SuperContext, "Scanned -> " + result.contents, Toast.LENGTH_SHORT).show()
+                Log.d("TESTE","teste "+ result.contents)
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
 
 
 }

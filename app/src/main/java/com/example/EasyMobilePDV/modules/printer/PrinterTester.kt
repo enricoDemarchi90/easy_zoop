@@ -1,4 +1,4 @@
-package com.example.EasyMobilePDV
+package com.example.EasyMobilePDV.modules.printer
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -12,7 +12,6 @@ import com.pax.dal.exceptions.PrinterDevException
 import com.pax.neptunelite.api.NeptuneLiteUser
 
 class PrinterTester() {
-
     private var printerTester: PrinterTester? = null
     private var printer: IPrinter? = null
     private var dal: IDAL? = null
@@ -34,13 +33,6 @@ class PrinterTester() {
             }
         }
         return dal
-    }
-
-    fun getInstance(): PrinterTester? {
-        if (printerTester == null) {
-            printerTester = PrinterTester()
-        }
-        return printerTester
     }
 
     fun init() {

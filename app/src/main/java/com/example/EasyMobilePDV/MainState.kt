@@ -7,3 +7,4 @@ object tsStatic{
     var webView: WebView? = null
     var SuperContexto: Context? = null
 }
+
