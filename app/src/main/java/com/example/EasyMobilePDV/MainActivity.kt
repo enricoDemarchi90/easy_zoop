@@ -101,12 +101,12 @@ class MainActivity : ComponentActivity() {
                  ).show()
             }
         }
-        /*val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
+   /*     val preferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
         val editor = preferences.edit()
-        editor.putString("MarketplaceId","0bc5d980777d43fd9aee0f8d215d8735")
-        editor.putString("SellerId","43f859c8ac5949b5ba5e25c934f5019a")
-        editor.putString("Terminal","1493572076")
-        editor.putString("AccessKey","cfb1ccad-80fd-45e9-9b31-716be7913df7")
+        //editor.putString("MarketplaceId","0bc5d980777d43fd9aee0f8d215d8735")
+        //editor.putString("SellerId","43f859c8ac5949b5ba5e25c934f5019a")
+        //editor.putString("Terminal","1493572076")
+        //editor.putString("AccessKey","cfb1ccad-80fd-45e9-9b31-716be7913df7")
         editor.putString("MarketplaceId","")
         editor.putString("SellerId","")
         editor.putString("Terminal","")
